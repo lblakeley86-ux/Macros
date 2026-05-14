@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Macro Calculator — Daily Journal</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #faf6f0;
+    --warm: #f2ebe0;
+    --sand: #e8ddd0;
+    --taupe: #c8b89a;
+    --brown: #8a6a4a;
+    --dark: #3a2c1e;
+    --green: #6a9e6e;
+    --green-light: #e8f4e8;
+    --amber: #d4853a;
+    --amber-light: #fdf0e0;
+    --rose: #c47a7a;
+    --blue: #6a8ea8;
+    --blue-light: #e8f0f6;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--cream);
+    color: var(--dark);
+    font-family: 'Jost', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+    padding: 0 0 60px;
+  }
+
+  /* Header */
+  .header {
+    background: var(--dark);
+    color: var(--cream);
+    padding: 36px 24px 28px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 30% 50%, rgba(106,158,110,0.15) 0%, transparent 60%),
+                radial-gradient(ellipse at 70% 50%, rgba(196,122,122,0.1) 0%, transparent 60%);
+  }
+  .header-inner { position: relative; }
+  .header-label {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--taupe);
+    margin-bottom: 8px;
+  }
+  .header-title {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 34px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.1;
+  }
+  .header-title em { font-style: italic; color: var(--taupe); }
+  .header-sub { font-size: 12px; color: #9a8a78; margin-top: 8px; letter-spacing: 0.04em; }
+
+  /* Section */
+  .section {
+    max-width: 520px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  .section-title {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 18px;
+    font-style: italic;
+    color: var(--brown);
+    margin: 28px 0 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--sand);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-title span { font-size: 16px; }
+
+  /* Cards */
+  .card {
+    background: #fff;
+    border: 1px solid var(--sand);
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 14px;
+    box-shadow: 0 2px 12px rgba(58,44,30,0.05);
+  }
+
+  /* Form rows */
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  .row.three { grid-template-columns: 1fr 1fr 1fr; }
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  label { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--brown); }
+  input[type=number], select {
+    background: var(--warm);
+    border: 1px solid var(--sand);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-family: 'Jost', sans-serif;
+    font-size: 14px;
+    color: var(--dark);
+    outline: none;
+    transition: border 0.2s;
+    width: 100%;
+    -moz-appearance: textfield;
+  }
+  input[type=number]::-webkit-outer-spin-button,
+  input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
+  input[type=number]:focus, select:focus { border-color: var(--brown); background: #fff; }
+  select { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238a6a4a' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
+
+  /* Radio pills */
+  .pill-group { display: flex; gap: 8px; flex-wrap: wrap; }
+  .pill input { display: none; }
+  .pill label {
+    display: block; cursor: pointer; padding: 7px 14px;
+    border: 1px solid var(--sand); border-radius: 20px;
+    font-size: 12px; letter-spacing: 0.03em; text-transform: none;
+    color: #7a6a5a; transition: all 0.2s; background: var(--warm);
+  }
+  .pill input:checked + label { background: var(--dark); color: var(--cream); border-color: var(--dark); }
+
+  /* Calc button */
+  .calc-btn {
+    width: 100%; padding: 14px;
+    background: var(--dark); color: var(--cream);
+    border: none; border-radius: 10px;
+    font-family: 'Jost', sans-serif; font-size: 14px; font-weight: 500;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    cursor: pointer; transition: all 0.2s; margin-top: 4px;
+  }
+  .calc-btn:hover { background: var(--brown); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(58,44,30,0.2); }
+
+  /* Results */
+  .results { display: none; }
+  .results.visible { display: block; animation: fadeUp 0.4s ease; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+  .calorie-hero {
+    background: var(--dark);
+    border-radius: 14px;
+    padding: 28px 20px;
+    text-align: center;
+    color: var(--cream);
+    margin-bottom: 14px;
+    position: relative;
+    overflow: hidden;
+  }
+  .calorie-hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at center, rgba(106,158,110,0.2) 0%, transparent 70%);
+  }
+  .calorie-hero-inner { position: relative; }
+  .calorie-label { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--taupe); margin-bottom: 8px; }
+  .calorie-num {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 64px; font-weight: 600; line-height: 1;
+    color: #fff;
+  }
+  .calorie-unit { font-size: 14px; color: var(--taupe); margin-top: 4px; letter-spacing: 0.1em; }
+  .calorie-range { font-size: 12px; color: #7a6a58; margin-top: 12px; }
+
+  .macro-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+  .macro-card {
+    border-radius: 12px;
+    padding: 16px 12px;
+    text-align: center;
+  }
+  .macro-card.protein { background: #fdf0e8; border: 1px solid #f0d0b0; }
+  .macro-card.carbs { background: #fdf8e8; border: 1px solid #f0e0a0; }
+  .macro-card.fat { background: var(--blue-light); border: 1px solid #c0d8ec; }
+  .macro-icon { font-size: 20px; margin-bottom: 6px; }
+  .macro-g {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 28px; font-weight: 600; line-height: 1;
+  }
+  .macro-card.protein .macro-g { color: var(--amber); }
+  .macro-card.carbs .macro-g { color: #c8983a; }
+  .macro-card.fat .macro-g { color: var(--blue); }
+  .macro-name { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: #8a7a6a; margin-top: 4px; }
+  .macro-cal { font-size: 11px; color: #aaa090; margin-top: 3px; }
+
+  /* Breakdown bars */
+  .breakdown { background: #fff; border: 1px solid var(--sand); border-radius: 14px; padding: 18px 20px; margin-bottom: 14px; }
+  .breakdown-title { font-family: 'Cormorant Garamond', serif; font-size: 15px; font-style: italic; color: var(--brown); margin-bottom: 14px; }
+  .bar-row { margin-bottom: 12px; }
+  .bar-meta { display: flex; justify-content: space-between; margin-bottom: 5px; }
+  .bar-label { font-size: 12px; color: #6a5a4a; }
+  .bar-val { font-size: 12px; font-weight: 500; }
+  .bar-bg { background: var(--warm); border-radius: 4px; height: 7px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 4px; transition: width 0.7s cubic-bezier(0.4,0,0.2,1); }
+
+  /* Meal split */
+  .meal-split { background: var(--green-light); border: 1px solid #b8d8b8; border-radius: 14px; padding: 18px 20px; margin-bottom: 14px; }
+  .meal-split-title { font-family: 'Cormorant Garamond', serif; font-size: 15px; font-style: italic; color: #4a7a4a; margin-bottom: 14px; }
+  .meal-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #c8e4c8; }
+  .meal-row:last-child { border-bottom: none; }
+  .meal-name { font-size: 13px; color: var(--dark); }
+  .meal-cals { font-size: 13px; font-weight: 500; color: var(--green); }
+  .meal-macros { font-size: 11px; color: #8aaa8a; }
+
+  /* Food log section */
+  .food-log-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .add-food-btn {
+    background: var(--green); color: #fff;
+    border: none; border-radius: 8px;
+    padding: 7px 14px; font-family: 'Jost', sans-serif;
+    font-size: 12px; cursor: pointer; transition: all 0.2s;
+  }
+  .add-food-btn:hover { background: #5a8e5e; }
+  .food-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 14px; border-radius: 10px;
+    background: var(--warm); border: 1px solid var(--sand);
+    margin-bottom: 7px; animation: fadeUp 0.25s ease;
+  }
+  .food-name { font-size: 13px; color: var(--dark); }
+  .food-macros { font-size: 11px; color: var(--taupe); margin-top: 2px; }
+  .food-cals { font-size: 14px; font-weight: 500; color: var(--amber); }
+  .remove-btn { background: none; border: none; cursor: pointer; color: #c8b0a0; font-size: 16px; padding: 2px 6px; transition: color 0.15s; }
+  .remove-btn:hover { color: var(--rose); }
+
+  .add-form { background: #fff; border: 1px solid var(--sand); border-radius: 12px; padding: 16px; margin-bottom: 10px; display: none; }
+  .add-form.open { display: block; animation: fadeUp 0.2s ease; }
+  .form-row { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr; gap: 8px; margin-bottom: 10px; align-items: end; }
+  .form-row input { font-size: 13px; padding: 8px 10px; }
+  .form-row input::placeholder { color: #c0b0a0; font-size: 12px; }
+  .confirm-btn {
+    background: var(--green); color: #fff; border: none;
+    border-radius: 8px; padding: 9px 16px;
+    font-family: 'Jost', sans-serif; font-size: 13px; cursor: pointer; transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .confirm-btn:hover { background: #5a8e5e; }
+
+  /* Daily totals */
+  .totals-bar {
+    background: var(--dark); color: var(--cream);
+    border-radius: 12px; padding: 14px 18px;
+    display: flex; justify-content: space-around;
+    margin-bottom: 14px;
+  }
+  .total-item { text-align: center; }
+  .total-num { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 600; }
+  .total-lbl { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--taupe); }
+
+  /* Tip box */
+  .tip {
+    background: var(--amber-light); border: 1px solid #f0d0a0;
+    border-radius: 12px; padding: 14px 16px; font-size: 13px;
+    color: #7a5a2a; line-height: 1.6; margin-bottom: 14px;
+  }
+  .tip strong { color: var(--amber); }
+
+  /* Footer */
+  .footer { text-align: center; padding: 24px; font-size: 11px; color: #c0b0a0; letter-spacing: 0.06em; }
+  .footer em { font-style: italic; color: var(--taupe); }
+
+  /* Responsive */
+  @media (max-width: 420px) {
+    .macro-grid { grid-template-columns: 1fr 1fr 1fr; gap: 7px; }
+    .macro-g { font-size: 22px; }
+    .form-row { grid-template-columns: 1fr 1fr; gap: 7px; }
+    .calorie-num { font-size: 50px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <div class="header-label">Daily Nutrition Journal</div>
+    <div class="header-title">Macro <em>&</em> Calorie<br>Calculator</div>
+    <div class="header-sub">Calculate your goals · Track your meals · Own your nutrition</div>
+  </div>
+</div>
+
+<div class="section">
+
+  <!-- Step 1: Personal Info -->
+  <div class="section-title"><span>①</span> Your Details</div>
+  <div class="card">
+    <div class="row">
+      <div class="field">
+        <label>Age</label>
+        <input type="number" id="age" placeholder="e.g. 28" min="15" max="90">
+      </div>
+      <div class="field">
+        <label>Sex</label>
+        <select id="sex">
+          <option value="female">Female</option>
+          <option value="male">Male</option>
+        </select>
+      </div>
+    </div>
+    <div class="row">
+      <div class="field">
+        <label>Height (cm)</label>
+        <input type="number" id="height" placeholder="e.g. 165" min="100" max="250">
+      </div>
+      <div class="field">
+        <label>Weight (kg)</label>
+        <input type="number" id="weight" placeholder="e.g. 65" min="30" max="300">
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 2: Activity -->
+  <div class="section-title"><span>②</span> Activity Level</div>
+  <div class="card">
+    <div class="pill-group">
+      <label class="pill"><input type="radio" name="activity" value="1.2"><span style="display:none"></span><label>Sedentary</label></label>
+      <label class="pill"><input type="radio" name="activity" value="1.375"><span></span><label>Light (1–2x/wk)</label></label>
+      <label class="pill"><input type="radio" name="activity" value="1.55" checked><span></span><label>Moderate (3–5x/wk)</label></label>
+      <label class="pill"><input type="radio" name="activity" value="1.725"><span></span><label>Active (6–7x/wk)</label></label>
+      <label class="pill"><input type="radio" name="activity" value="1.9"><span></span><label>Very Active</label></label>
+    </div>
+  </div>
+
+  <!-- Step 3: Goal -->
+  <div class="section-title"><span>③</span> Your Goal</div>
+  <div class="card">
+    <div class="pill-group">
+      <label class="pill"><input type="radio" name="goal" value="lose"><span></span><label>🔥 Lose Fat</label></label>
+      <label class="pill"><input type="radio" name="goal" value="maintain" checked><span></span><label>⚖️ Maintain</label></label>
+      <label class="pill"><input type="radio" name="goal" value="gain"><span></span><label>💪 Build Muscle</label></label>
+    </div>
+  </div>
+
+  <!-- Step 4: Diet Style -->
+  <div class="section-title"><span>④</span> Macro Style</div>
+  <div class="card">
+    <div class="pill-group">
+      <label class="pill"><input type="radio" name="diet" value="balanced" checked><span></span><label>Balanced</label></label>
+      <label class="pill"><input type="radio" name="diet" value="highprotein"><span></span><label>High Protein</label></label>
+      <label class="pill"><input type="radio" name="diet" value="lowcarb"><span></span><label>Low Carb</label></label>
+      <label class="pill"><input type="radio" name="diet" value="keto"><span></span><label>Keto</label></label>
+    </div>
+  </div>
+
+  <button class="calc-btn" onclick="calculate()">Calculate My Macros</button>
+
+  <!-- Results -->
+  <div class="results" id="results">
+
+    <div class="section-title" style="margin-top:28px"><span>✦</span> Your Daily Targets</div>
+
+    <div class="calorie-hero">
+      <div class="calorie-hero-inner">
+        <div class="calorie-label">Daily Calories</div>
+        <div class="calorie-num" id="res-calories">—</div>
+        <div class="calorie-unit">KCAL PER DAY</div>
+        <div class="calorie-range" id="res-range"></div>
+      </div>
+    </div>
+
+    <div class="macro-grid">
+      <div class="macro-card protein">
+        <div class="macro-icon">🥩</div>
+        <div class="macro-g" id="res-protein">—</div>
+        <div class="macro-name">Protein</div>
+        <div class="macro-cal" id="res-protein-cal"></div>
+      </div>
+      <div class="macro-card carbs">
+        <div class="macro-icon">🌾</div>
+        <div class="macro-g" id="res-carbs">—</div>
+        <div class="macro-name">Carbs</div>
+        <div class="macro-cal" id="res-carbs-cal"></div>
+      </div>
+      <div class="macro-card fat">
+        <div class="macro-icon">🥑</div>
+        <div class="macro-g" id="res-fat">—</div>
+        <div class="macro-name">Fat</div>
+        <div class="macro-cal" id="res-fat-cal"></div>
+      </div>
+    </div>
+
+    <!-- Breakdown -->
+    <div class="breakdown">
+      <div class="breakdown-title">Macro breakdown</div>
+      <div class="bar-row">
+        <div class="bar-meta">
+          <span class="bar-label">Protein</span>
+          <span class="bar-val" style="color:var(--amber)" id="bar-p-pct"></span>
+        </div>
+        <div class="bar-bg"><div class="bar-fill" id="bar-p" style="background:var(--amber);width:0%"></div></div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-meta">
+          <span class="bar-label">Carbohydrates</span>
+          <span class="bar-val" style="color:#c8983a" id="bar-c-pct"></span>
+        </div>
+        <div class="bar-bg"><div class="bar-fill" id="bar-c" style="background:#c8983a;width:0%"></div></div>
+      </div>
+      <div class="bar-row" style="margin-bottom:0">
+        <div class="bar-meta">
+          <span class="bar-label">Fat</span>
+          <span class="bar-val" style="color:var(--blue)" id="bar-f-pct"></span>
+        </div>
+        <div class="bar-bg"><div class="bar-fill" id="bar-f" style="background:var(--blue);width:0%"></div></div>
+      </div>
+    </div>
+
+    <!-- Meal split -->
+    <div class="meal-split">
+      <div class="meal-split-title">Suggested meal split</div>
+      <div id="meal-split-rows"></div>
+    </div>
+
+    <!-- Tip -->
+    <div class="tip" id="diet-tip"></div>
+
+    <!-- Food log -->
+    <div class="section-title"><span>✦</span> Today's Food Log</div>
+
+    <div class="totals-bar" id="totals-bar">
+      <div class="total-item"><div class="total-num" id="log-cal">0</div><div class="total-lbl">Calories</div></div>
+      <div class="total-item"><div class="total-num" id="log-pro">0g</div><div class="total-lbl">Protein</div></div>
+      <div class="total-item"><div class="total-num" id="log-car">0g</div><div class="total-lbl">Carbs</div></div>
+      <div class="total-item"><div class="total-num" id="log-fat">0g</div><div class="total-lbl">Fat</div></div>
+    </div>
+
+    <div class="food-log-header">
+      <span style="font-size:13px;color:var(--taupe)">Logged foods</span>
+      <button class="add-food-btn" onclick="toggleAddForm()">+ Add Food</button>
+    </div>
+
+    <div class="add-form" id="add-form">
+      <div class="form-row">
+        <div class="field"><label>Food name</label><input type="text" id="f-name" placeholder="e.g. Chicken breast"></div>
+        <div class="field"><label>Calories</label><input type="number" id="f-cal" placeholder="kcal" min="0"></div>
+        <div class="field"><label>Protein (g)</label><input type="number" id="f-pro" placeholder="g" min="0"></div>
+        <div class="field"><label>Carbs (g)</label><input type="number" id="f-car" placeholder="g" min="0"></div>
+        <div class="field"><label>Fat (g)</label><input type="number" id="f-fat" placeholder="g" min="0"></div>
+      </div>
+      <button class="confirm-btn" onclick="addFood()">Add to Log</button>
+    </div>
+
+    <div id="food-list"></div>
+
+  </div><!-- /results -->
+
+</div><!-- /section -->
+
+<div class="footer">
+  <em>Your Nutrition Journal</em> · Calculations based on Mifflin-St Jeor equation<br>
+  Consult a healthcare professional for personalised nutrition advice.
+</div>
+
+<script>
+  // Pill radio fix — make the whole label clickable
+  document.querySelectorAll('.pill').forEach(pill => {
+    const input = pill.querySelector('input');
+    const labels = pill.querySelectorAll('label');
+    labels.forEach(l => l.setAttribute('for', input.id || (input.id = 'pill_' + Math.random().toString(36).slice(2))));
+    pill.addEventListener('click', () => { input.checked = true; });
+  });
+
+  let targetCals = 2000, targetPro = 150, targetCarbs = 250, targetFat = 65;
+  let foods = [];
+
+  function getRadio(name) {
+    return document.querySelector(`input[name="${name}"]:checked`)?.value;
+  }
+
+  function calculate() {
+    const age = +document.getElementById('age').value;
+    const sex = document.getElementById('sex').value;
+    const height = +document.getElementById('height').value;
+    const weight = +document.getElementById('weight').value;
+    const activity = +getRadio('activity');
+    const goal = getRadio('goal');
+    const diet = getRadio('diet');
+
+    if (!age || !height || !weight) {
+      alert('Please fill in your age, height, and weight.');
+      return;
+    }
+
+    // Mifflin-St Jeor BMR
+    let bmr = sex === 'male'
+      ? 10 * weight + 6.25 * height - 5 * age + 5
+      : 10 * weight + 6.25 * height - 5 * age - 161;
+
+    let tdee = Math.round(bmr * activity);
+
+    let calories = tdee;
+    if (goal === 'lose') calories = Math.round(tdee * 0.8);
+    if (goal === 'gain') calories = Math.round(tdee * 1.1);
+
+    // Macro splits
+    let pPct, cPct, fPct;
+    if (diet === 'balanced')     { pPct = 0.30; cPct = 0.40; fPct = 0.30; }
+    if (diet === 'highprotein')  { pPct = 0.40; cPct = 0.35; fPct = 0.25; }
+    if (diet === 'lowcarb')      { pPct = 0.35; cPct = 0.20; fPct = 0.45; }
+    if (diet === 'keto')         { pPct = 0.25; cPct = 0.05; fPct = 0.70; }
+
+    const protein = Math.round((calories * pPct) / 4);
+    const carbs   = Math.round((calories * cPct) / 4);
+    const fat     = Math.round((calories * fPct) / 9);
+
+    targetCals = calories; targetPro = protein; targetCarbs = carbs; targetFat = fat;
+
+    // Populate results
+    document.getElementById('res-calories').textContent = calories.toLocaleString();
+    document.getElementById('res-range').textContent = `Maintenance: ${tdee.toLocaleString()} kcal · ${goal === 'lose' ? '−' + (tdee - calories) : goal === 'gain' ? '+' + (calories - tdee) : '0'} kcal adjustment`;
+    document.getElementById('res-protein').textContent = protein + 'g';
+    document.getElementById('res-carbs').textContent = carbs + 'g';
+    document.getElementById('res-fat').textContent = fat + 'g';
+    document.getElementById('res-protein-cal').textContent = Math.round(protein * 4) + ' kcal';
+    document.getElementById('res-carbs-cal').textContent = Math.round(carbs * 4) + ' kcal';
+    document.getElementById('res-fat-cal').textContent = Math.round(fat * 9) + ' kcal';
+
+    // Bars
+    setTimeout(() => {
+      document.getElementById('bar-p').style.width = (pPct * 100) + '%';
+      document.getElementById('bar-c').style.width = (cPct * 100) + '%';
+      document.getElementById('bar-f').style.width = (fPct * 100) + '%';
+    }, 100);
+    document.getElementById('bar-p-pct').textContent = Math.round(pPct * 100) + '%';
+    document.getElementById('bar-c-pct').textContent = Math.round(cPct * 100) + '%';
+    document.getElementById('bar-f-pct').textContent = Math.round(fPct * 100) + '%';
+
+    // Meal split
+    const meals = [
+      { name: '🌅 Breakfast', pct: 0.25 },
+      { name: '☀️ Lunch', pct: 0.35 },
+      { name: '🌙 Dinner', pct: 0.30 },
+      { name: '🍎 Snack', pct: 0.10 },
+    ];
+    document.getElementById('meal-split-rows').innerHTML = meals.map(m => `
+      <div class="meal-row">
+        <div>
+          <div class="meal-name">${m.name}</div>
+          <div class="meal-macros">P: ${Math.round(protein * m.pct)}g · C: ${Math.round(carbs * m.pct)}g · F: ${Math.round(fat * m.pct)}g</div>
+        </div>
+        <div class="meal-cals">${Math.round(calories * m.pct)} kcal</div>
+      </div>
+    `).join('');
+
+    // Tip
+    const tips = {
+      lose: '<strong>Fat loss tip:</strong> Prioritise protein to preserve muscle while in a calorie deficit. Aim to eat your protein target even on low-appetite days.',
+      maintain: '<strong>Maintenance tip:</strong> Focus on food quality and meal timing. Consistent eating patterns help regulate hunger and energy throughout the day.',
+      gain: '<strong>Muscle gain tip:</strong> Eat your surplus on training days. Pair your carbs around workouts for best performance and recovery.',
+    };
+    document.getElementById('diet-tip').innerHTML = tips[goal];
+
+    document.getElementById('results').classList.add('visible');
+    document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    updateLog();
+  }
+
+  function toggleAddForm() {
+    const f = document.getElementById('add-form');
+    f.classList.toggle('open');
+  }
+
+  function addFood() {
+    const name = document.getElementById('f-name').value.trim();
+    const cal  = +document.getElementById('f-cal').value || 0;
+    const pro  = +document.getElementById('f-pro').value || 0;
+    const car  = +document.getElementById('f-car').value || 0;
+    const fat  = +document.getElementById('f-fat').value || 0;
+    if (!name || !cal) { alert('Please enter a food name and calories.'); return; }
+    foods.push({ name, cal, pro, car, fat, id: Date.now() });
+    document.getElementById('f-name').value = '';
+    document.getElementById('f-cal').value = '';
+    document.getElementById('f-pro').value = '';
+    document.getElementById('f-car').value = '';
+    document.getElementById('f-fat').value = '';
+    document.getElementById('add-form').classList.remove('open');
+    updateLog();
+  }
+
+  function removeFood(id) {
+    foods = foods.filter(f => f.id !== id);
+    updateLog();
+  }
+
+  function updateLog() {
+    const totCal = foods.reduce((s, f) => s + f.cal, 0);
+    const totPro = foods.reduce((s, f) => s + f.pro, 0);
+    const totCar = foods.reduce((s, f) => s + f.car, 0);
+    const totFat = foods.reduce((s, f) => s + f.fat, 0);
+
+    document.getElementById('log-cal').textContent = totCal;
+    document.getElementById('log-pro').textContent = totPro + 'g';
+    document.getElementById('log-car').textContent = totCar + 'g';
+    document.getElementById('log-fat').textContent = totFat + 'g';
+
+    document.getElementById('food-list').innerHTML = foods.length === 0
+      ? `<div style="text-align:center;color:var(--taupe);font-size:13px;padding:16px 0">No foods logged yet</div>`
+      : foods.map(f => `
+        <div class="food-item">
+          <div>
+            <div class="food-name">${f.name}</div>
+            <div class="food-macros">P: ${f.pro}g · C: ${f.car}g · F: ${f.fat}g</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <span class="food-cals">${f.cal} kcal</span>
+            <button class="remove-btn" onclick="removeFood(${f.id})">×</button>
+          </div>
+        </div>
+      `).join('');
+  }
+</script>
+</body>
+</html>
